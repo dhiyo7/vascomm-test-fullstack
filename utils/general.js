@@ -1,31 +1,54 @@
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import nodemailer from "nodemailer";
+import { NextResponse } from "next/server";
 
-export function cn(...inputs) {
-    return twMerge(clsx(inputs));
-}
+export const cn = (...inputs) => {
+  return twMerge(clsx(inputs));
+};
 
-export function formatCurr(price) {
-    const idr = new Intl.NumberFormat('id-ID', {
-        currency: 'IDR',
-        useGrouping: true,
-    });
+export const formatCurr = (price) => {
+  const idr = new Intl.NumberFormat("id-ID", {
+    currency: "IDR",
+    useGrouping: true,
+  });
 
-    return idr.format(price);
-}
+  return idr.format(price);
+};
 
-export function generatedRandomPassword() {
-    const length = 12;
-    const charset =
-        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const prefix = 'vas';
-    const prefixLength = prefix.length;
-    let password = prefix;
+export const sendEmailPassword = async (subject, to, text) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.NODEMAILER_EMAIL, // Your email address
+      pass: process.env.NODEMAILER_PASSWORD, // Your email password apps
+    },
+  });
 
-    for (let i = 0; i < length - prefixLength; i++) {
-        const randomIndex = Math.floor(Math.random() * charset.length);
-        password += charset[randomIndex];
+  const mailOptions = {
+    from: process.env.NODEMAILER_EMAIL,
+    to,
+    subject: subject,
+    text,
+  };
+
+  try {
+    const resEmail = await transporter.sendMail(mailOptions);
+    if (resEmail) {
+      return true;
+    } else {
+      return false;
     }
+  } catch (error) {
+    return false;
+  }
+};
 
-    return password;
-}
+export const baseResponse = ({ status, message, data, error }) => {
+  return NextResponse.json({
+    status,
+    message,
+    data,
+    error,
+  });
+};

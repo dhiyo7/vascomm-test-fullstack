@@ -4,11 +4,19 @@ import { HttpStatusCode } from "axios";
 
 import bcrypt from "bcrypt";
 
+const DEFAULT_TAKE = 10;
+
 const prisma = new PrismaClient();
 
-export const GET = async () => {
+export const GET = async (req) => {
   try {
+    const url = new URL(req.url);
+    const skip = parseInt(url.searchParams.get("skip") || 0);
+    const take = parseInt(url.searchParams.get("take") || DEFAULT_TAKE);
+
     const data = await prisma.user.findMany({
+      skip,
+      take,
       select: {
         id: true,
         name: true,
@@ -25,10 +33,11 @@ export const GET = async () => {
       message: "Berhasil",
       data,
     });
-  } catch (_) {
+  } catch (error) {
     return baseResponse({
       status: HttpStatusCode.InternalServerError,
       message: "Terjadi Kesalahan",
+      error
     });
   }
 };

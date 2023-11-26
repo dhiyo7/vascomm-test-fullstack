@@ -54,8 +54,13 @@ export const PUT = async (req, { params }) => {
     });
   } catch (error) {
     return baseResponse({
-      status: HttpStatusCode.InternalServerError,
-      message: "Terjadi Kesalahan",
+      status:
+        error.code === "P2025"
+          ? HttpStatusCode.NotFound
+          : HttpStatusCode.InternalServerError,
+      message:
+        error.code === "P2025" ? "Akun tidak ditemukan" : "Terjadi Kesalahan",
+      error,
     });
   }
 };
@@ -64,7 +69,10 @@ export const DELETE = async (_, { params }) => {
   try {
     const { id } = params;
 
-    await prisma.user.delete({
+    await prisma.user.update({
+      data: {
+        status: true,
+      },
       where: { id },
     });
 
@@ -74,8 +82,13 @@ export const DELETE = async (_, { params }) => {
     });
   } catch (error) {
     return baseResponse({
-      status: HttpStatusCode.InternalServerError,
-      message: "Terjadi Kesalahan",
+      status:
+        error.code === "P2025"
+          ? HttpStatusCode.NotFound
+          : HttpStatusCode.InternalServerError,
+      message:
+        error.code === "P2025" ? "Akun tidak ditemukan" : "Terjadi Kesalahan",
+      error,
     });
   }
 };
